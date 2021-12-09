@@ -434,55 +434,82 @@ class filamentscale:
 
         self.dt_pin = int(config.get('dt_pin'))
         self.sck_pin = int(config.get('sck_pin'))
+        self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+        self.hx.set_reading_format("MSB", "MSB")
+        scale_name = config.get_name().split()[1]
 
         self.gcode = self.printer.lookup_object('gcode')
 
-        self.hx = HX711(23,24)
-        self.hx.set_reading_format("MSB", "MSB")
+        self.gcode.register_mux_command('GET_SCALE_WEIGHT', 'SCALE', scale_name,
+                    self.cmd_GET_SCALE_WEIGHT,
+                    desc=self.cmd_GET_SCALE_WEIGHT_help)
 
-        self.gcode.register_command('GET_WEIGHT',
-                    self.cmd_GET_WEIGHT,
-                    desc=self.cmd_GET_WEIGHT_help)
-
-        self.gcode.register_command('CALIB_REF',
-                    self.cmd_CALIB_REF,
-                    desc=self.cmd_CALIB_REF_help)
-        self.gcode.register_command('TAREs the scale',
+        self.gcode.register_mux_command('CALIB_SCALE_REF', 'SCALE', scale_name,
+                    self.cmd_CALIB_SCALE_REF,
+                    desc=self.cmd_CALIB_SCALE_REF_help)
+        self.gcode.register_mux_command('CALIB_SCALE_OFFSET', 'SCALE', scale_name,
+                    self.cmd_CALIB_SCALE_OFFSET,
+                    desc=self.cmd_CALIB_SCALE_OFFSET_help)
+        self.gcode.register_mux_command('TARE_SCALE', 'SCALE', scale_name,
                     self.cmd_TARE_SCALE,
                     desc=self.cmd_TARE_SCALE_help)
 
-
+    def get_weight(self, REF, OFFSET):
+        
+        self.hx.set_reference_unit(REF)
+        self.hx.reset()
+        #max(0, int(hx.get_weight(5)))
+        if(OFFSET != 0):
+            val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+        else:
+            val = self.hx.get_weight(5)
+        #self.gcode.respond_info("The weight is " + str(val) + " grams")
+        return {'weight': val}
 
     cmd_TARE_SCALE_help = "Tare Scale"
     def cmd_TARE_SCALE(self, gcmnd):
         self.hx.tare()
         self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
+        val = float(self.hx.get_weight(5))
+        self.gcode.respond_info("The weight is " + str(val) + " grams")
 
-    cmd_CALIB_REF_help = "Calibrate the reference value"
-    def cmd_CALIB_REF(self, gcmd):
+    cmd_CALIB_SCALE_REF_help = "Calibrate the reference value"
+    def cmd_CALIB_SCALE_REF(self, gcmd):
         self.known_weight = gcmd.get_int('KNOWN_VALUE')
         self.hx.set_reference_unit(1)
-        self.hx.reset()
+        #self.hx.reset()
         val = float(self.hx.get_weight(5)/self.known_weight)
-        self.gcode.respond_info("Your reference value is " + str(val))
-    
-    cmd_GET_WEIGHT_help = "get the weight of the scale"
-    def cmd_GET_WEIGHT(self, gcmd):
+        self.gcode.respond_info("Your reference value is " + str(val) + "\n Now remove the item from the scale and run CALIB_OFFSET REF=" + str(val))
+        
+
+    cmd_CALIB_SCALE_OFFSET_help = "Calibrate the reference value"
+    def cmd_CALIB_SCALE_OFFSET(self, gcmd):
+        self.REF = gcmd.get_int('REF')
+        GPIO.cleanup()
+        self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+        self.hx.set_reading_format("MSB", "MSB")
+        self.hx.reset()
+        self.hx.set_reference_unit(self.REF)
+        val = self.hx.get_weight(5)
+        self.gcode.respond_info("Your offset value is " + str(val))
+
+    cmd_GET_SCALE_WEIGHT_help = "get the weight of the scale"
+    def cmd_GET_SCALE_WEIGHT(self, gcmd):
         REF = gcmd.get_float('REF', 1)
         OFFSET = gcmd.get_float('OFFSET', 0)
         self.hx.set_reference_unit(REF)
         self.hx.reset()
         #max(0, int(hx.get_weight(5)))
-        if(OFFSET > 0):
+        if(OFFSET != 0):
             val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
         else:
             val = self.hx.get_weight(5)
-            self.gcode.respond_info("Make sure you calibrate your scale, using TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
+            self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
         self.gcode.respond_info("The weight is " + str(val) + " grams")
-    
+        
+
 
 def load_config_prefix(config):
     return filamentscale(config)
-
 
 
