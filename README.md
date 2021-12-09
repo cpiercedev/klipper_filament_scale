@@ -16,3 +16,7 @@ pip3 install RPi.GPIO==0.7.1a4
 
 Add Macros and Py to Klipper
 Will make an installer soon.
+
+
+## Hardware Notes
+Twisted wires are **required**.
