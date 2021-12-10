@@ -436,21 +436,21 @@ class filamentscale:
         self.sck_pin = int(config.get('sck_pin'))
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
-        scale_name = config.get_name().split()[1]
+        self.scale_name = config.get_name().split()[1]
 
         self.gcode = self.printer.lookup_object('gcode')
 
-        self.gcode.register_mux_command('GET_SCALE_WEIGHT', 'SCALE', scale_name,
+        self.gcode.register_mux_command('GET_SCALE_WEIGHT', 'SCALE', self.scale_name,
                     self.cmd_GET_SCALE_WEIGHT,
                     desc=self.cmd_GET_SCALE_WEIGHT_help)
 
-        self.gcode.register_mux_command('CALIB_SCALE_REF', 'SCALE', scale_name,
+        self.gcode.register_mux_command('CALIB_SCALE_REF', 'SCALE', self.scale_name,
                     self.cmd_CALIB_SCALE_REF,
                     desc=self.cmd_CALIB_SCALE_REF_help)
-        self.gcode.register_mux_command('CALIB_SCALE_OFFSET', 'SCALE', scale_name,
+        self.gcode.register_mux_command('CALIB_SCALE_OFFSET', 'SCALE', self.scale_name,
                     self.cmd_CALIB_SCALE_OFFSET,
                     desc=self.cmd_CALIB_SCALE_OFFSET_help)
-        self.gcode.register_mux_command('TARE_SCALE', 'SCALE', scale_name,
+        self.gcode.register_mux_command('TARE_SCALE', 'SCALE', self.scale_name,
                     self.cmd_TARE_SCALE,
                     desc=self.cmd_TARE_SCALE_help)
 
@@ -479,10 +479,14 @@ class filamentscale:
         self.hx.set_reference_unit(1)
         #self.hx.reset()
         val = float(self.hx.get_weight(5)/self.known_weight)
-        self.gcode.respond_info("Your reference value is " + str(val) + "\n Now remove the item from the scale and run CALIB_OFFSET REF=" + str(val))
-        
+        command_string = ("SET_REF"
+                         " SCALE=%s REF=%s"
+                         % (self.scale_name, val))
+        self.gcode.run_script_from_command(command_string)
+        self.gcode.respond_info("Now remove the item from the scale and run CALIB_SCALE_OFFSET SCALE=%s REF=%s" % ( self.scale_name, str(val)))
+    
 
-    cmd_CALIB_SCALE_OFFSET_help = "Calibrate the reference value"
+    cmd_CALIB_SCALE_OFFSET_help = "Calibrate the offset value"
     def cmd_CALIB_SCALE_OFFSET(self, gcmd):
         self.REF = gcmd.get_int('REF')
         GPIO.cleanup()
@@ -491,6 +495,10 @@ class filamentscale:
         self.hx.reset()
         self.hx.set_reference_unit(self.REF)
         val = self.hx.get_weight(5)
+        command_string = ("SET_OFFSET"
+                         " SCALE=%s OFFSET=%s"
+                         % (self.scale_name, val))
+        self.gcode.run_script_from_command(command_string)
         self.gcode.respond_info("Your offset value is " + str(val))
 
     cmd_GET_SCALE_WEIGHT_help = "get the weight of the scale"
