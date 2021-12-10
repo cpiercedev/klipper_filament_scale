@@ -4,9 +4,9 @@ Klipper Module and Macros to add filament scale capabilities with the HX711 load
 BOM
 - 1 - HX711 Amplifier board and Bar load cell, these usually come as a pack (I'm using a 10kg but will testing with a 5kg soon) https://www.aliexpress.com/item/33046037411.html?spm=a2g0o.cart.0.0.de2e3c00XCiZCg&mp=1
 
-- 2 - M4x?
+- 2 - M4x16
 
-- 2 - M5x?
+- 2 - M5x16
 
 - There are 3 new printed parts, shown below printed in RED.
 ![ERCP with Load Cell](./Pictures/IMG_4161.jpeg?raw=true)
