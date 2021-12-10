@@ -38,7 +38,15 @@ sudo git clone https://github.com/cpiercedev/klipper_filament_scale.git
 ~/klipper_filament_scale/install.sh
 
 ```
-
+## Moonraker Updater
+Add the following to moonraker.conf
+```
+[update_manager client klipper_filament_scale]
+type: git_repo
+path: /home/pi/klipper_filament_scale
+origin: https://github.com/cpiercedev/klipper_filament_scale.git
+install_script: install.sh
+```
 
 ## Calibrating the scale
 
