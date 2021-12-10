@@ -470,13 +470,14 @@ class filamentscale:
     def cmd_TARE_SCALE(self, gcmnd):
         self.hx.tare()
         self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
+        self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
         val = float(self.hx.get_weight(5))
-        self.gcode.respond_info("The weight is " + str(val) + " grams")
+        #self.gcode.respond_info("The weight is " + str(val) + " grams")
 
     cmd_CALIB_SCALE_REF_help = "Calibrate the reference value"
     def cmd_CALIB_SCALE_REF(self, gcmd):
-        self.known_weight = gcmd.get_int('KNOWN_VALUE')
-        self.hx.set_reference_unit(1)
+        self.known_weight = gcmd.get_float('KNOWN_VALUE')
+        self.hx.set_reference_unit(1.)
         #self.hx.reset()
         val = float(self.hx.get_weight(5)/self.known_weight)
         command_string = ("SET_REF"
@@ -488,7 +489,7 @@ class filamentscale:
 
     cmd_CALIB_SCALE_OFFSET_help = "Calibrate the offset value"
     def cmd_CALIB_SCALE_OFFSET(self, gcmd):
-        self.REF = gcmd.get_int('REF')
+        self.REF = gcmd.get_float('REF')
         GPIO.cleanup()
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
@@ -497,9 +498,9 @@ class filamentscale:
         val = self.hx.get_weight(5)
         command_string = ("SET_OFFSET"
                          " SCALE=%s OFFSET=%s"
-                         % (self.scale_name, val))
+                         % (self.scale_name, -val))
         self.gcode.run_script_from_command(command_string)
-        self.gcode.respond_info("Your offset value is " + str(val))
+        self.gcode.respond_info("Your offset value is " + str(-val))
 
     cmd_GET_SCALE_WEIGHT_help = "get the weight of the scale"
     def cmd_GET_SCALE_WEIGHT(self, gcmd):
