@@ -26,15 +26,15 @@ link_extension()
 # Step 3: Copy all config files if they do not exist
 copy_config()
 {
-    cp -n "${SRCDIR}/filament_scale_hardware.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_hardware.cfg"
-    cp -n "${SRCDIR}/filament_scale_vars.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg"
+    cp -n "${SRCDIR}/Macros/filament_scale_hardware.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_hardware.cfg"
+    cp -n "${SRCDIR}/Macros/filament_scale_vars.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg"
     #cp -n "${SRCDIR}/ercf_hardware.cfg" "${KLIPPER_CONFIG_PATH}/client_macros.cfg"
 }
 # Step 3: Update Config Files
 link_config()
 {
     #ln -sf "${SRCDIR}/ercf_hardware.cfg" "${KLIPPER_CONFIG_PATH}/ercf_hardware.cfg"
-    ln -sf "${SRCDIR}/filament_scale_software.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_software.cfg"
+    ln -sf "${SRCDIR}/Macros/filament_scale_software.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_software.cfg"
 }
 # Step 4: Install startup script
 install_script()
