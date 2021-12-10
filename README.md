@@ -45,4 +45,6 @@ sudo git clone https://github.com/cpiercedev/klipper_filament_scale.git
 - Now place an item with a known weight on the scale, and run `CALIB_SCALE_REF SCALE=*X* KNOWN_VALUE=*X*`
 - Copy the command from the output and run it, it should look like `CALIB_SCALE_OFFSET SCALE=*X* REF=*X*`
 
+# That's it, you are all set!
+
 
