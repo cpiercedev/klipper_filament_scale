@@ -8,10 +8,11 @@ BOM
 
 - 2 - M5x16
 
-- There are 3 new printed parts, shown below printed in RED.
+- 3 new printed parts for the Carrot Patch (Shown below printed in RED)
+
 ![ERCP with Load Cell](./Pictures/IMG_4161.jpeg?raw=true)
 
-
+There is an mount included that is the same style as the stock filament spool holder, this has not been tested yet.
 
 ---
 
