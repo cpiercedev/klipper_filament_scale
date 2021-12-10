@@ -16,6 +16,7 @@ pip3 install RPi.GPIO==0.7.1a4
 deactivate
 
 sudo git clone https://github.com/cpiercedev/klipper_filament_scale.git
+
 ./klipper_filament_scale/install.sh
 
 ```
