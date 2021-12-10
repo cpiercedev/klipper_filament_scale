@@ -1,4 +1,4 @@
-# Enraged Rabbit Carrot Scale
+#  klipper_filament_scale
 #
 # Copyright (C) 2021  str1pes
 #
