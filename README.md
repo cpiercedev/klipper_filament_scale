@@ -35,7 +35,7 @@ deactivate
 
 sudo git clone https://github.com/cpiercedev/klipper_filament_scale.git
 
-./klipper_filament_scale/install.sh
+~/klipper_filament_scale/install.sh
 
 ```
 
