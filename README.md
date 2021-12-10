@@ -27,7 +27,7 @@ Install RPi.GPIO on the Python virtual Klippy environment
 ```
 cd ~
 
-source /klipper-env/bin/activate
+source /klippy-env/bin/activate
 
 pip3 install RPi.GPIO==0.7.1a4
 
