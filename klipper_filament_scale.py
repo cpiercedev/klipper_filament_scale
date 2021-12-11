@@ -453,6 +453,10 @@ class filamentscale:
         self.gcode.register_mux_command('TARE_SCALE', 'SCALE', self.scale_name,
                     self.cmd_TARE_SCALE,
                     desc=self.cmd_TARE_SCALE_help)
+        self.gcode.register_mux_command('CHECK_PRINT_WEIGHT', 'SCALE', self.scale_name,
+                    self.cmd_CHECK_PRINT_WEIGHT,
+                    desc=self.cmd_GET_SCALE_WEIGHT_help)
+
 
     def get_weight(self, REF, OFFSET):
         
@@ -515,6 +519,21 @@ class filamentscale:
             val = self.hx.get_weight(5)
             self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
         self.gcode.respond_info("The weight is " + str(val) + " grams")
+
+    cmd_CHECK_PRINT_WEIGHT_help = "Check to see if we have enough filament to print"
+    def cmd_CHECK_PRINT_WEIGHT(self, gcmd):
+        PRINT_WEIGHT = gcmd.get_float('PRINT_WEIGHT')
+        REF = gcmd.get_float('REF', 1)
+        OFFSET = gcmd.get_float('OFFSET', 0)
+        self.hx.set_reference_unit(REF)
+        self.hx.reset()
+        val = max(0, int(self.hx.get_weight(5) + OFFSET))
+        if (PRINT_WEIGHT > val):
+            self.gcode.respond_info("You don't have enough filament!")
+            command_string = ("PAUSE")
+            self.gcode.run_script_from_command(command_string)
+        else:
+            self.gcode.respond_info("You have enough filament, starting print. Filament left: %s g" % (str(val)))
         
 
 
