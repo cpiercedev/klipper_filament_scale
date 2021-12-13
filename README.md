@@ -28,13 +28,13 @@ Install RPi.GPIO on the Python virtual Klippy environment
 ```
 cd ~
 
-source /klippy-env/bin/activate
+source klippy-env/bin/activate
 
 pip3 install RPi.GPIO==0.7.1a4
 
 deactivate
 
-sudo git clone https://github.com/cpiercedev/klipper_filament_scale.git
+git clone https://github.com/cpiercedev/klipper_filament_scale.git
 
 ~/klipper_filament_scale/install.sh
 
