@@ -59,3 +59,20 @@ install_script: install.sh
 # That's it, you are all set!
 
 
+## Adding weight checks to single color prints (Hopefully MM prints will be coming soon, waiting on SuperSlicer support)
+
+- You must use the OutputFilenameFormat option in SS to add the weight to the end of the file name. Formats that will work 
+
+weight_{int((total_weight+1))}g.gcode
+
+weight_{int((total_weight+1))}.gcode
+
+- Add the script /PostProcessor/gcode-addWeight.py to your Post-Processing Scripts.This will add the weight to your PRINT_START variables. 
+- Add the following to your PRINT_START macro
+```    
+{% set WEIGHT = params.WEIGHT|default(0)|int %}
+VERIFY_WEIGHT SCALE=0 PRINT_WEIGHT={WEIGHT}
+ ```
+
+<img width="1138" alt="Screen Shot 2021-12-13 at 10 27 51 AM" src="https://user-images.githubusercontent.com/43823548/145867826-4c6c122d-b21a-4309-93a6-996b3a1bf893.png">
+
