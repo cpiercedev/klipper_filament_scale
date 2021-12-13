@@ -76,3 +76,5 @@ VERIFY_WEIGHT SCALE=0 PRINT_WEIGHT={WEIGHT}
 
 <img width="1138" alt="Screen Shot 2021-12-13 at 10 27 51 AM" src="https://user-images.githubusercontent.com/43823548/145867826-4c6c122d-b21a-4309-93a6-996b3a1bf893.png">
 
+
+Utilizes the HX711 library created by tatobari https://github.com/tatobari/hx711py
