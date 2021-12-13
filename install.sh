@@ -26,16 +26,16 @@ link_extension()
 # Step 3: Copy all config files if they do not exist
 copy_config()
 {
-        if [ ! -f "${KLIPPER_CONFIG_PATH}/filament_scale_hardware.cfg" ]
-    then
+    #    if [ ! -f "${KLIPPER_CONFIG_PATH}/filament_scale_hardware.cfg" ]
+    #then
        cp -u "${SRCDIR}/Macros/filament_scale_hardware.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_hardware.cfg"
-    else
-        echo "File found. Do nothing"
-    if [ ! -f "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg" ]
-    then
-       cp -u "${SRCDIR}/Macros/filament_scale_vars.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg"
-    else
-        echo "File found. Do nothing"
+    #else
+     #   echo "File found. Do nothing"
+    #if [ ! -f "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg" ]
+    #then
+       cp -n "${SRCDIR}/Macros/filament_scale_vars.cfg" "${KLIPPER_CONFIG_PATH}/filament_scale_vars.cfg"
+    #else
+     #   echo "File found. Do nothing"
     
     
     #cp -n "${SRCDIR}/ercf_hardware.cfg" "${KLIPPER_CONFIG_PATH}/client_macros.cfg"
@@ -109,5 +109,6 @@ done
 verify_ready
 link_extension
 link_config
+copy_config
 install_script
 restart_klipper
