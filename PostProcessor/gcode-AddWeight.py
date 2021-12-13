@@ -7,20 +7,32 @@ import argparse
 
 # total arguments
 sourceFile=sys.argv[1]
-weight = sourceFile.partition("weight_")[2].replace(".gcode", '').replace("g",'')
 n = len(sys.argv)
 print("Total arguments passed:", n)
  
+weight=[]
 
- 
- # Read the ENTIRE g-code file into memory
 with open(sourceFile, "r") as f:
     lines = f.readlines()
 
 with open(sourceFile, 'r+') as f: #r+ does the work of rw
     lines = f.readlines()
     for i, line in enumerate(lines):
-        if line.startswith('print_start'):
+        if line.startswith('; filament used [g] = '):
+            weight = lines[i].strip().replace('; filament used [g] =','').replace(',','').split()
+            weight = [float(ele) for ele in weight]
+
+            print(weight)
+    f.seek(0)
+    for line in lines:
+        f.write(line)
+
+
+with open(sourceFile, 'r+') as f: #r+ does the work of rw
+    lines = f.readlines()
+    for i, line in enumerate(lines):
+        if line.startswith('PRINT_START'):
+            print("found print start")
             lines[i] = lines[i].strip() + " WEIGHT=%s \n" % (weight)
     f.seek(0)
     for line in lines:

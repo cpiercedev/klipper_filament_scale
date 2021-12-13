@@ -535,7 +535,7 @@ class filamentscale:
     cmd_CHECK_PRINT_WEIGHT_help = "Check to see if we have enough filament to print"
     def cmd_CHECK_PRINT_WEIGHT(self, gcmd):
         try:
-            PRINT_WEIGHT = gcmd.get_float('PRINT_WEIGHT')
+            PRINT_WEIGHT = gcmd('PRINT_WEIGHT')
             REF = gcmd.get_float('REF', 1)
             OFFSET = gcmd.get_float('OFFSET', 0)
             self.hx.set_reference_unit(REF)
