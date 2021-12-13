@@ -531,7 +531,7 @@ class filamentscale:
             self.gcode.respond_info("The weight is " + str(val) + " grams")
         except:
             self.gcode.respond_info("Something went wrong!")
-
+        GPIO.cleanup()
     cmd_CHECK_PRINT_WEIGHT_help = "Check to see if we have enough filament to print"
     def cmd_CHECK_PRINT_WEIGHT(self, gcmd):
         try:
@@ -549,9 +549,10 @@ class filamentscale:
                self.gcode.respond_info("You have enough filament, starting print. Filament left: %s g" % (str(val)))
         except:
             self.gcode.respond_info("Something went wrong!")
-
+        GPIO.cleanup()
 
 def load_config_prefix(config):
+    GPIO.cleanup()
     return filamentscale(config)
 
 
