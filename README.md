@@ -60,7 +60,7 @@ install_script: install.sh
 # That's it, you are all set!
 
 
-## Adding weight checks to print_start macro
+## Adding weight checks to print_start macro (Works with both single and MM prints)
 
 
 - Add the script /PostProcessor/gcode-addWeight.py to your Post-Processing Scripts.This will add the weight to your PRINT_START variables. 
