@@ -13,6 +13,7 @@ BOM
 ![ERCP with Load Cell](./Pictures/IMG_4161.jpeg?raw=true)
 
 There is an mount included that is the same style as the stock filament spool holder, this has not been tested yet.
+<img width="795" alt="Screen Shot 2021-12-14 at 12 39 47 PM" src="https://user-images.githubusercontent.com/43823548/146075963-dd6e07e4-6aac-42f6-99af-28f86942d6fa.png">
 
 ---
 
