@@ -431,7 +431,7 @@ class filamentscale:
     def __init__(self, config):
         self.config = config
         self.printer = config.get_printer()
-
+        
         self.dt_pin = int(config.get('dt_pin'))
         self.sck_pin = int(config.get('sck_pin'))
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
@@ -484,6 +484,7 @@ class filamentscale:
     cmd_CALIB_SCALE_REF_help = "Calibrate the reference value"
     def cmd_CALIB_SCALE_REF(self, gcmd):
         try:
+            
             self.known_weight = gcmd.get_float('KNOWN_VALUE')
             self.hx.set_reference_unit(1.)
             #self.hx.reset()
@@ -495,6 +496,7 @@ class filamentscale:
             self.gcode.respond_info("Now remove the item from the scale and run CALIB_SCALE_OFFSET SCALE=%s REF=%s" % ( self.scale_name, str(val)))
         except:
             self.gcode.respond_info("Something went wrong!")
+            GPIO.cleanup()
 
     cmd_CALIB_SCALE_OFFSET_help = "Calibrate the offset value"
     def cmd_CALIB_SCALE_OFFSET(self, gcmd):
@@ -514,10 +516,13 @@ class filamentscale:
 
         except:
             self.gcode.respond_info("Something went wrong!")
-
+            GPIO.cleanup()
+        GPIO.cleanup()
     cmd_GET_SCALE_WEIGHT_help = "get the weight of the scale"
     def cmd_GET_SCALE_WEIGHT(self, gcmd):
         try:
+            self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+            self.hx.set_reading_format("MSB", "MSB")
             REF = gcmd.get_float('REF', 1)
             OFFSET = gcmd.get_float('OFFSET', 0)
             self.hx.set_reference_unit(REF)
@@ -531,24 +536,29 @@ class filamentscale:
             self.gcode.respond_info("The weight is " + str(val) + " grams")
         except:
             self.gcode.respond_info("Something went wrong!")
-        GPIO.cleanup()
+            GPIO.cleanup()
+        
     cmd_CHECK_PRINT_WEIGHT_help = "Check to see if we have enough filament to print"
     def cmd_CHECK_PRINT_WEIGHT(self, gcmd):
-        try:
-            PRINT_WEIGHT = gcmd('PRINT_WEIGHT')
-            REF = gcmd.get_float('REF', 1)
-            OFFSET = gcmd.get_float('OFFSET', 0)
+        self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+        self.hx.set_reading_format("MSB", "MSB")
+        PRINT_WEIGHT = gcmd.get_float('PRINT_WEIGHT')
+        if(PRINT_WEIGHT != 0):
+            REF = gcmd.get_float('REF', 1.)
+            OFFSET = gcmd.get_float('OFFSET', 0.)
             self.hx.set_reference_unit(REF)
             self.hx.reset()
-            val = max(0, int(self.hx.get_weight(5) + OFFSET))
+            val = max(0, float(self.hx.get_weight(5) + OFFSET))
+        
             if (PRINT_WEIGHT > val):
-                self.gcode.respond_info("You don't have enough filament!")
+                self.gcode.respond_info("You don't have enough filament on filamentscale %s!" % (self.scale_name))
                 command_string = ("PAUSE")
                 self.gcode.run_script_from_command(command_string)
             else:
-               self.gcode.respond_info("You have enough filament, starting print. Filament left: %s g" % (str(val)))
-        except:
-            self.gcode.respond_info("Something went wrong!")
+                self.gcode.respond_info("You have enough filament on scale:%s" % (self.scale_name))
+                GPIO.cleanup()
+        else:
+            exit
         GPIO.cleanup()
 
 def load_config_prefix(config):

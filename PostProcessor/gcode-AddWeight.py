@@ -10,7 +10,7 @@ sourceFile=sys.argv[1]
 n = len(sys.argv)
 print("Total arguments passed:", n)
  
-weight=[]
+weight=""
 
 with open(sourceFile, "r") as f:
     lines = f.readlines()
@@ -19,8 +19,7 @@ with open(sourceFile, 'r+') as f: #r+ does the work of rw
     lines = f.readlines()
     for i, line in enumerate(lines):
         if line.startswith('; filament used [g] = '):
-            weight = lines[i].strip().replace('; filament used [g] =','').replace(',','').split()
-            weight = [float(ele) for ele in weight]
+            weight = lines[i].strip().replace('; filament used [g] = ','')
 
             print(weight)
     f.seek(0)
@@ -31,9 +30,9 @@ with open(sourceFile, 'r+') as f: #r+ does the work of rw
 with open(sourceFile, 'r+') as f: #r+ does the work of rw
     lines = f.readlines()
     for i, line in enumerate(lines):
-        if line.startswith('PRINT_START'):
+        if line.lower().startswith('print_start'):
             print("found print start")
-            lines[i] = lines[i].strip() + " WEIGHT=%s \n" % (weight)
+            lines[i] = lines[i].strip() + " WEIGHTS=\"%s\" \n" % (weight)
     f.seek(0)
     for line in lines:
         f.write(line)
