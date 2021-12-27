@@ -21,7 +21,7 @@ check_klipper()
 link_extension()
 {
     echo "Linking extension to Klipper..."
-    ln -sf "${SRCDIR}/klipper_filament_scale.py" "${KLIPPER_PATH}/klippy/extras/klipper_filament_scale.py"
+    ln -sf "${SRCDIR}/filamentscale.py" "${KLIPPER_PATH}/klippy/extras/filamentscale.py"
 }
 # Step 3: Copy all config files if they do not exist
 copy_config()

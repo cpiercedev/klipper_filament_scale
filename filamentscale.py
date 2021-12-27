@@ -427,6 +427,7 @@ class HX711:
         self.power_down()
         self.power_up()
         
+        
 class filamentscale:
     def __init__(self, config):
         self.config = config
