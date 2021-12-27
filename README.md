@@ -13,6 +13,7 @@ BOM
 ![ERCP with Load Cell](./Pictures/IMG_4161.jpeg?raw=true)
 
 There is an mount included that is the same style as the stock filament spool holder, this has not been tested yet.
+<img width="795" alt="Screen Shot 2021-12-14 at 12 39 47 PM" src="https://user-images.githubusercontent.com/43823548/146075963-dd6e07e4-6aac-42f6-99af-28f86942d6fa.png">
 
 ---
 
@@ -59,18 +60,13 @@ install_script: install.sh
 # That's it, you are all set!
 
 
-## Adding weight checks to single color prints (Hopefully MM prints will be coming soon, waiting on SuperSlicer support)
+## Adding weight checks to print_start macro (Works with both single and MM prints)
 
-- You must use the OutputFilenameFormat option in SS to add the weight to the end of the file name. Formats that will work 
-
-weight_{int((total_weight+1))}g.gcode
-
-weight_{int((total_weight+1))}.gcode
 
 - Add the script /PostProcessor/gcode-addWeight.py to your Post-Processing Scripts.This will add the weight to your PRINT_START variables. 
 - Add the following to your PRINT_START macro
 ```    
-{% set WEIGHT = params.WEIGHT|default(0)|int %}
+{% set WEIGHT = params.WEIGHTS|default(0)|int %}
 VERIFY_WEIGHT SCALE=0 PRINT_WEIGHT={WEIGHT}
  ```
 
