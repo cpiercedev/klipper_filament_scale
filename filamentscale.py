@@ -434,6 +434,7 @@ class filamentscale:
         
         self.dt_pin = int(config.get('dt_pin'))
         self.sck_pin = int(config.get('sck_pin'))
+        self.unit = config.get('channel')
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
         self.scale_name = config.get_name().split()[1]
@@ -462,38 +463,65 @@ class filamentscale:
         
         self.hx.set_reference_unit(REF)
         self.hx.reset()
-        #max(0, int(hx.get_weight(5)))
-        if(OFFSET != 0):
-            val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+        #Check if unit A or B
+        if(self.unit == 'A'):
+            if(OFFSET != 0):
+                val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+            else:
+                val = self.hx.get_weight(5)
+            #self.gcode.respond_info("The weight is " + str(val) + " grams")
+            return {'weight': val}
         else:
-            val = self.hx.get_weight(5)
-        #self.gcode.respond_info("The weight is " + str(val) + " grams")
-        return {'weight': val}
+            if(OFFSET != 0):
+                val = max(0, int(self.hx.get_weight_B(5) + OFFSET)) 
+            else:
+                val = self.hx.get_weight_B(5)
+            #self.gcode.respond_info("The weight is " + str(val) + " grams")
+            return {'weight': val}
 
     cmd_TARE_SCALE_help = "Tare Scale"
     def cmd_TARE_SCALE(self, gcmnd):
         try:
-            self.hx.tare()
-            self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
-            self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
-            val = float(self.hx.get_weight(5))
-            #self.gcode.respond_info("The weight is " + str(val) + " grams")
+            #Check if unit A or B
+            if(self.unit == 'A'):
+                self.hx.tare()
+                self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
+                self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
+                val = float(self.hx.get_weight(5))
+                #self.gcode.respond_info("The weight is " + str(val) + " grams")
+            else:
+                self.hx.tare_B()
+                self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
+                self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
+                val = float(self.hx.get_weight_B(5))
+                #self.gcode.respond_info("The weight is " + str(val) + " grams")
         except:
             self.gcode.respond_info("Something went wrong!")
 
     cmd_CALIB_SCALE_REF_help = "Calibrate the reference value"
     def cmd_CALIB_SCALE_REF(self, gcmd):
         try:
-            
-            self.known_weight = gcmd.get_float('KNOWN_VALUE')
-            self.hx.set_reference_unit(1.)
-            #self.hx.reset()
-            val = float(self.hx.get_weight(5)/self.known_weight)
-            command_string = ("SET_REF"
-                         " SCALE=%s REF=%s"
-                         % (self.scale_name, val))
-            self.gcode.run_script_from_command(command_string)
-            self.gcode.respond_info("Now remove the item from the scale and run CALIB_SCALE_OFFSET SCALE=%s REF=%s" % ( self.scale_name, str(val)))
+            #Check if unit A or B
+            if(self.unit == 'A'):
+                self.known_weight = gcmd.get_float('KNOWN_VALUE')
+                self.hx.set_reference_unit(1.)
+                #self.hx.reset()
+                val = float(self.hx.get_weight(5)/self.known_weight)
+                command_string = ("SET_REF"
+                            " SCALE=%s REF=%s"
+                            % (self.scale_name, val))
+                self.gcode.run_script_from_command(command_string)
+                self.gcode.respond_info("Now remove the item from the scale and run CALIB_SCALE_OFFSET SCALE=%s REF=%s" % ( self.scale_name, str(val)))
+            else:
+                self.known_weight = gcmd.get_float('KNOWN_VALUE')
+                self.hx.set_reference_unit_B(1.)
+                #self.hx.reset()
+                val = float(self.hx.get_weight_B(5)/self.known_weight)
+                command_string = ("SET_REF"
+                            " SCALE=%s REF=%s"
+                            % (self.scale_name, val))
+                self.gcode.run_script_from_command(command_string)
+                self.gcode.respond_info("Now remove the item from the scale and run CALIB_SCALE_OFFSET SCALE=%s REF=%s" % ( self.scale_name, str(val)))
         except:
             self.gcode.respond_info("Something went wrong!")
             GPIO.cleanup()
@@ -503,16 +531,29 @@ class filamentscale:
         self.REF = gcmd.get_float('REF')
         try:
             GPIO.cleanup()
-            self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
-            self.hx.set_reading_format("MSB", "MSB")
-            self.hx.reset()
-            self.hx.set_reference_unit(self.REF)
-            val = self.hx.get_weight(5)
-            command_string = ("SET_OFFSET"
-                         " SCALE=%s OFFSET=%s"
-                         % (self.scale_name, -val))
-            self.gcode.run_script_from_command(command_string)
-            self.gcode.respond_info("Your offset value is " + str(-val))
+            #Check if unit A or B
+            if(self.unit == 'A'):
+                self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+                self.hx.set_reading_format("MSB", "MSB")
+                self.hx.reset()
+                self.hx.set_reference_unit(self.REF)
+                val = self.hx.get_weight(5)
+                command_string = ("SET_OFFSET"
+                            " SCALE=%s OFFSET=%s"
+                            % (self.scale_name, -val))
+                self.gcode.run_script_from_command(command_string)
+                self.gcode.respond_info("Your offset value is " + str(-val))
+            else:
+                self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+                self.hx.set_reading_format("MSB", "MSB")
+                self.hx.reset()
+                self.hx.set_reference_unit_B(self.REF)
+                val = self.hx.get_weight_B(5)
+                command_string = ("SET_OFFSET"
+                            " SCALE=%s OFFSET=%s"
+                            % (self.scale_name, -val))
+                self.gcode.run_script_from_command(command_string)
+                self.gcode.respond_info("Your offset value is " + str(-val))
 
         except:
             self.gcode.respond_info("Something went wrong!")
@@ -521,45 +562,81 @@ class filamentscale:
     cmd_GET_SCALE_WEIGHT_help = "get the weight of the scale"
     def cmd_GET_SCALE_WEIGHT(self, gcmd):
         try:
-            self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
-            self.hx.set_reading_format("MSB", "MSB")
-            REF = gcmd.get_float('REF', 1)
-            OFFSET = gcmd.get_float('OFFSET', 0)
-            self.hx.set_reference_unit(REF)
-            self.hx.reset()
-            #max(0, int(hx.get_weight(5)))
-            if(OFFSET != 0):
-                val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+            #Check if unit A or B
+            if(self.unit == 'A'):
+                self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+                self.hx.set_reading_format("MSB", "MSB")
+                REF = gcmd.get_float('REF', 1)
+                OFFSET = gcmd.get_float('OFFSET', 0)
+                self.hx.set_reference_unit(REF)
+                self.hx.reset()
+                #max(0, int(hx.get_weight(5)))
+                if(OFFSET != 0):
+                    val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+                else:
+                    val = self.hx.get_weight(5)
+                    self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
+                self.gcode.respond_info("The weight is " + str(val) + " grams")
             else:
-                val = self.hx.get_weight(5)
-                self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
-            self.gcode.respond_info("The weight is " + str(val) + " grams")
+                self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+                self.hx.set_reading_format("MSB", "MSB")
+                REF = gcmd.get_float('REF', 1)
+                OFFSET = gcmd.get_float('OFFSET', 0)
+                self.hx.set_reference_unit_B(REF)
+                self.hx.reset()
+                #max(0, int(hx.get_weight(5)))
+                if(OFFSET != 0):
+                    val = max(0, int(self.hx.get_weight_B(5) + OFFSET)) 
+                else:
+                    val = self.hx.get_weight_B(5)
+                    self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
+                self.gcode.respond_info("The weight is " + str(val) + " grams")
         except:
             self.gcode.respond_info("Something went wrong!")
             GPIO.cleanup()
         
     cmd_CHECK_PRINT_WEIGHT_help = "Check to see if we have enough filament to print"
     def cmd_CHECK_PRINT_WEIGHT(self, gcmd):
+        #Check if unit A or B
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
         PRINT_WEIGHT = gcmd.get_float('PRINT_WEIGHT')
-        if(PRINT_WEIGHT != 0):
-            REF = gcmd.get_float('REF', 1.)
-            OFFSET = gcmd.get_float('OFFSET', 0.)
-            self.hx.set_reference_unit(REF)
-            self.hx.reset()
-            val = max(0, float(self.hx.get_weight(5) + OFFSET))
+        if(self.unit == 'A'):
+            if(PRINT_WEIGHT != 0):
+                REF = gcmd.get_float('REF', 1.)
+                OFFSET = gcmd.get_float('OFFSET', 0.)
+                self.hx.set_reference_unit(REF)
+                self.hx.reset()
+                val = max(0, float(self.hx.get_weight(5) + OFFSET))
         
-            if (PRINT_WEIGHT > val):
-                self.gcode.respond_info("You don't have enough filament on filamentscale %s!" % (self.scale_name))
-                command_string = ("PAUSE")
-                self.gcode.run_script_from_command(command_string)
+                if (PRINT_WEIGHT > val):
+                    self.gcode.respond_info("You don't have enough filament on filamentscale %s!" % (self.scale_name))
+                    command_string = ("PAUSE")
+                    self.gcode.run_script_from_command(command_string)
+                else:
+                    self.gcode.respond_info("You have enough filament on scale:%s" % (self.scale_name))
+                    GPIO.cleanup()
             else:
-                self.gcode.respond_info("You have enough filament on scale:%s" % (self.scale_name))
+                exit
                 GPIO.cleanup()
         else:
-            exit
-        GPIO.cleanup()
+            if(PRINT_WEIGHT != 0):
+                REF = gcmd.get_float('REF', 1.)
+                OFFSET = gcmd.get_float('OFFSET', 0.)
+                self.hx.set_reference_unit_B(REF)
+                self.hx.reset()
+                val = max(0, float(self.hx.get_weight_B(5) + OFFSET))
+        
+                if (PRINT_WEIGHT > val):
+                    self.gcode.respond_info("You don't have enough filament on filamentscale %s!" % (self.scale_name))
+                    command_string = ("PAUSE")
+                    self.gcode.run_script_from_command(command_string)
+                else:
+                    self.gcode.respond_info("You have enough filament on scale:%s" % (self.scale_name))
+                    GPIO.cleanup()
+            else:
+                exit
+                GPIO.cleanup()
 
 def load_config_prefix(config):
     GPIO.cleanup()
