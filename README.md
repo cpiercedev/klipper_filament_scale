@@ -2,11 +2,11 @@
 Klipper Module and Macros to add filament scale capabilities with the HX711 load cell amplifier. This is still a very young project and only has basic functionality.
 
 BOM
-- 1 - HX711 Amplifier board and Bar load cell, these usually come as a pack (I'm using a 10kg but will testing with a 5kg soon) https://www.aliexpress.com/item/33046037411.html?spm=a2g0o.cart.0.0.de2e3c00XCiZCg&mp=1
+- 1 - HX711 Amplifier board and Bar load cell, these usually come as a pack. There are two different sizes that I have found, one that has 2x M5 and one with 2xM4. The latter is 5mm shorter. Both sizes are supported. I have purchased these, but am looking into other options as well. https://www.aliexpress.com/item/33046037411.html?spm=a2g0o.cart.0.0.de2e3c00XCiZCg&mp=1
 
-- 2 - M4x16
+- 2/4 - M4x16
 
-- 2 - M5x16
+- 2/0 - M5x16
 
 - 3 new printed parts for the Carrot Patch (Shown below printed in RED)
 
@@ -17,7 +17,7 @@ There is an mount included that is the same style as the stock filament spool ho
 
 ---
 
-- You will need to have 2 GPIO pins available for each filament scale.
+- You will need to have 2 GPIO pins available for each pair of filament scales.
 
 - Twisted wires are **required**.
 
@@ -50,9 +50,14 @@ origin: https://github.com/cpiercedev/klipper_filament_scale.git
 install_script: install.sh
 ```
 
+## Set the HX711 pins in your filament_scale_hardware.cfg
+
+The pins correspond to the pins used on your pi
+
+channel: can be set to A or B depending on which channel the load cell is hooked to on the HX711. This defaults to channel A.
 ## Calibrating the scale
 
-- With nothing on the scale, use the TARE `SCALE=*X* macro`
+- With nothing on the scale, use the `TARE_SCALE SCALE=*X* macro`
 - Now place an item with a known weight on the scale, and run `CALIB_SCALE_REF SCALE=*X* KNOWN_VALUE=*X*`
 - Copy the command from the output and run it, it should look like `CALIB_SCALE_OFFSET SCALE=*X* REF=*X*`
 
