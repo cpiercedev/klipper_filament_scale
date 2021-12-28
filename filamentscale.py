@@ -427,7 +427,7 @@ class HX711:
         self.power_down()
         self.power_up()
         
-        
+
 class filamentscale:
     def __init__(self, config):
         self.config = config
@@ -435,7 +435,7 @@ class filamentscale:
         
         self.dt_pin = int(config.get('dt_pin'))
         self.sck_pin = int(config.get('sck_pin'))
-        self.unit = config.get('channel')
+        self.channel = config.get('channel', 'A')
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
         self.scale_name = config.get_name().split()[1]
@@ -462,10 +462,11 @@ class filamentscale:
 
     def get_weight(self, REF, OFFSET):
         
+    
         self.hx.set_reference_unit(REF)
         self.hx.reset()
         #Check if unit A or B
-        if(self.unit == 'A'):
+        if(self.channel == 'A'):
             if(OFFSET != 0):
                 val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
             else:
@@ -482,18 +483,21 @@ class filamentscale:
 
     cmd_TARE_SCALE_help = "Tare Scale"
     def cmd_TARE_SCALE(self, gcmnd):
+        GPIO.cleanup()
+        self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
+        self.hx.set_reading_format("MSB", "MSB")
         try:
             #Check if unit A or B
-            if(self.unit == 'A'):
+            if(self.channel == 'A'):
                 self.hx.tare()
                 self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
-                self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
+                self.gcode.respond_info("Run \"CALIB_SCALE_REF SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
                 val = float(self.hx.get_weight(5))
                 #self.gcode.respond_info("The weight is " + str(val) + " grams")
             else:
                 self.hx.tare_B()
                 self.gcode.respond_info("Tare complete, place known weight on now... \n This only needs to be run prior to calibrating the reference") 
-                self.gcode.respond_info("Run \"CALIB_SCALE SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
+                self.gcode.respond_info("Run \"CALIB_SCALE_REF SCALE=%s KNOWN_VALUE=*\"" % (self.scale_name))
                 val = float(self.hx.get_weight_B(5))
                 #self.gcode.respond_info("The weight is " + str(val) + " grams")
         except:
@@ -503,7 +507,7 @@ class filamentscale:
     def cmd_CALIB_SCALE_REF(self, gcmd):
         try:
             #Check if unit A or B
-            if(self.unit == 'A'):
+            if(self.channel == 'A'):
                 self.known_weight = gcmd.get_float('KNOWN_VALUE')
                 self.hx.set_reference_unit(1.)
                 #self.hx.reset()
@@ -533,7 +537,7 @@ class filamentscale:
         try:
             GPIO.cleanup()
             #Check if unit A or B
-            if(self.unit == 'A'):
+            if(self.channel == 'A'):
                 self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
                 self.hx.set_reading_format("MSB", "MSB")
                 self.hx.reset()
@@ -564,21 +568,26 @@ class filamentscale:
     def cmd_GET_SCALE_WEIGHT(self, gcmd):
         try:
             #Check if unit A or B
-            if(self.unit == 'A'):
+            if(self.channel == 'A'):
+
                 self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
                 self.hx.set_reading_format("MSB", "MSB")
                 REF = gcmd.get_float('REF', 1)
+                if(REF == 0):
+                    self.gcode.respond_info("Reference cannot be 0")
+                    exit
                 OFFSET = gcmd.get_float('OFFSET', 0)
                 self.hx.set_reference_unit(REF)
                 self.hx.reset()
                 #max(0, int(hx.get_weight(5)))
                 if(OFFSET != 0):
-                    val = max(0, int(self.hx.get_weight(5) + OFFSET)) 
+                    val = max(0, float(self.hx.get_weight(5) + OFFSET)) 
                 else:
                     val = self.hx.get_weight(5)
                     self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
                 self.gcode.respond_info("The weight is " + str(val) + " grams")
             else:
+                #self.gcode.respond_info("Channel B" + self.channel)
                 self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
                 self.hx.set_reading_format("MSB", "MSB")
                 REF = gcmd.get_float('REF', 1)
@@ -587,7 +596,7 @@ class filamentscale:
                 self.hx.reset()
                 #max(0, int(hx.get_weight(5)))
                 if(OFFSET != 0):
-                    val = max(0, int(self.hx.get_weight_B(5) + OFFSET)) 
+                    val = max(0, float(self.hx.get_weight_B(5) + OFFSET)) 
                 else:
                     val = self.hx.get_weight_B(5)
                     self.gcode.respond_info("Make sure you calibrate your scale, Use TARE_SCALE followed by CALIB_REF KNOWN_VALUE= *Weight of known object*")
@@ -602,7 +611,7 @@ class filamentscale:
         self.hx = HX711(int(self.dt_pin),int(self.sck_pin))
         self.hx.set_reading_format("MSB", "MSB")
         PRINT_WEIGHT = gcmd.get_float('PRINT_WEIGHT')
-        if(self.unit == 'A'):
+        if(self.channel == 'A'):
             if(PRINT_WEIGHT != 0):
                 REF = gcmd.get_float('REF', 1.)
                 OFFSET = gcmd.get_float('OFFSET', 0.)
