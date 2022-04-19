@@ -23,46 +23,7 @@ There is an mount included that is the same style as the stock filament spool ho
 
 --- 
 
-## Installation
-Install RPi.GPIO on the Python virtual Klippy environment
 
-```
-cd ~
-
-source klippy-env/bin/activate
-
-pip3 install RPi.GPIO==0.7.1a4
-
-deactivate
-
-git clone https://github.com/cpiercedev/klipper_filament_scale.git
-
-~/klipper_filament_scale/install.sh
-
-```
-## Moonraker Updater
-Add the following to moonraker.conf
-```
-[update_manager client klipper_filament_scale]
-type: git_repo
-path: /home/pi/klipper_filament_scale
-origin: https://github.com/cpiercedev/klipper_filament_scale.git
-install_script: install.sh
-```
-
-## Set the HX711 pins in your filament_scale_hardware.cfg
-
-The pins correspond to the pins used on your pi
-
-channel: can be set to A or B depending on which channel the load cell is hooked to on the HX711. This defaults to channel A.
-## Calibrating the scale
-
-- With nothing on the scale, use the `TARE_SCALE SCALE=*X* macro`
-- Now place an item with a known weight on the scale, and run `CALIB_SCALE_REF SCALE=*X* KNOWN_VALUE=*X*`
-- Copy the command from the output and run it, it should look like `CALIB_SCALE_OFFSET SCALE=*X* REF=*X*`
-
-- Use Get_Weight SCALE=x to get the current weight on the scale.
-# That's it, you are all set!
 
 
 ## Adding weight checks to print_start macro (Works with both single and MM prints)
@@ -78,4 +39,3 @@ VERIFY_WEIGHT SCALE=0 PRINT_WEIGHT={WEIGHT}
 <img width="1138" alt="Screen Shot 2021-12-13 at 10 27 51 AM" src="https://user-images.githubusercontent.com/43823548/145867826-4c6c122d-b21a-4309-93a6-996b3a1bf893.png">
 
 
-Utilizes the HX711 library created by tatobari https://github.com/tatobari/hx711py
